@@ -60,9 +60,8 @@ public class UserRepositoryImpl {
 */
     public List<UserEntity> getUsersForSentimentAnalysis(){
         Query query = new Query();
-        query.addCriteria(Criteria.where("email").exists(true));
-        query.addCriteria(Criteria.where("email").ne("").ne(null));
-        query.addCriteria(Criteria.where("email").regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"));
+        query.addCriteria(Criteria.where("email").exists(true).ne("").ne(null)
+                .regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"));
         query.addCriteria(Criteria.where("sentimentAnalysis").is(true));
 
         /*Criteria criteria = new Criteria();
