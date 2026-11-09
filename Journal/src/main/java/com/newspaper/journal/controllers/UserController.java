@@ -10,11 +10,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
+
+    private static final String EMAIL_REGEX_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
     //@Autowired
     private UserService userService;
@@ -71,15 +74,24 @@ public class UserController {
         Optional<UserEntity> oldUser = getUserNameAfterAuthentication();
         if(oldUser.isPresent())
         {
-            oldUser.get().setUsername(userEntity.getUsername());
-            oldUser.get().setPassword(userEntity.getPassword());
-            oldUser.get().setRoles(userEntity.getRoles());
-            try {
-                UserEntity updatedUserEntity = userService.encodePasswordAndCreateEntry(oldUser.get());
-                return new ResponseEntity<>(updatedUserEntity, HttpStatus.CREATED);
-            }catch (Exception e) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            if(Pattern.matches(EMAIL_REGEX_PATTERN, userEntity.getEmail()))
+            {
+                UserEntity newUser = oldUser.get();
+                newUser.setUsername(userEntity.getUsername());
+                newUser.setPassword(userEntity.getPassword());
+                newUser.setRoles(userEntity.getRoles().stream().map(role-> role.toUpperCase()).toList());
+                newUser.setEmail(userEntity.getEmail());
+                newUser.setSentimentAnalysis(userEntity.isSentimentAnalysis());
+                try {
+                    UserEntity updatedUserEntity = userService.encodePasswordAndCreateEntry(newUser);
+                    return new ResponseEntity<>(updatedUserEntity, HttpStatus.CREATED);
+                } catch (Exception e) {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
             }
+            else{
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
