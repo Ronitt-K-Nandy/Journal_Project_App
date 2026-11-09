@@ -26,6 +26,10 @@ public class UserEntity {
     @NonNull                //Specific to mongodb
     private String username;
 
+    private String email;
+
+    private boolean sentimentAnalysis;
+
     @NonNull
     private String password;
 

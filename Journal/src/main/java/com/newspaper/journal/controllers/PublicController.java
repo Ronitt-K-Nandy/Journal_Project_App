@@ -29,7 +29,7 @@ public class PublicController {
     public ResponseEntity<UserEntity> createUser(@RequestBody UserEntity userEntity)
     {
         try{
-
+            userEntity.setRoles(userEntity.getRoles().stream().map(role-> role.toUpperCase()).toList());
             UserEntity createdUserEntity = userService.encodePasswordAndCreateEntry(userEntity);
             return new ResponseEntity<>(createdUserEntity,HttpStatus.CREATED);
         }catch(Exception e)
