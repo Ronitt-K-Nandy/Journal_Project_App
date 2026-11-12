@@ -1,9 +1,14 @@
 package com.newspaper.journal.services;
 
+import com.newspaper.journal.config.NewConfiguration;
 import com.newspaper.journal.entities.UserEntity;
 import com.newspaper.journal.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -16,6 +21,10 @@ public class UserService {
 
     private UserRepository userRepository;
     private BCryptPasswordEncoder passwordEncoder;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private JwtService jwtService;
 
     public UserService(UserRepository userRepository,BCryptPasswordEncoder passwordEncoder){
         this.userRepository=userRepository;
@@ -54,5 +63,15 @@ public class UserService {
     public Boolean removeUserByUsername(String userName){
         userRepository.deleteUserByUsername(userName);
         return true;
+    }
+
+    public String verify(UserEntity user){
+        Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+        if(authenticate.isAuthenticated()){
+            return jwtService.generateToken(user.getUsername());
+        }
+        else{
+            return "Authentication is Failed!";
+        }
     }
 }
