@@ -106,4 +106,9 @@ public class UserController {
         Optional<UserEntity> user = userService.getUserByUsername(userName);
         return user;
     }
+
+    @PostMapping("/login")
+    public String login(@RequestBody UserEntity user) {
+        return userService.verify(user);
+    }
 }
